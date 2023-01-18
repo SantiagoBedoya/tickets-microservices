@@ -1,0 +1,42 @@
+version: '3.8'
+services:
+  database:
+    image: mongo:6.0.3
+    restart: always
+    container_name: mongodb
+  api-gateway:
+    restart: always
+    image: nginx:latest
+    container_name: api_gateway
+    volumes:
+      - "./nginx/default.conf:/etc/nginx/conf.d/default.conf"
+    ports:
+      - "8080:80"
+  auth:
+    build:
+      context: ./auth
+    container_name: auth
+    environment:
+      PORT: 3000
+      MONGODB_URI: mongodb://database:27017/auth
+      JWT_SECRET: superSecret123
+      JWT_EXPIRESIN: 2h
+    links:
+      - database
+    depends_on:
+      - database
+      - api-gateway
+  tickets:
+    build:
+      context: ./tickets
+    container_name: tickets
+    environment:
+      PORT: 3001
+      MONGODB_URI: mongodb://database:27017/tickets
+      AUTH_URL: auth:5001
+    links:
+      - database
+      - auth
+    depends_on:
+      - database
+      - api-gateway

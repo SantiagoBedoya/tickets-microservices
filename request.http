@@ -1,0 +1,42 @@
+@BASE_URL=http://localhost:8080
+@TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2M2M3NDM1ZTA0NTJjMDQ1YmIyNDdlZTYiLCJpYXQiOjE2NzQwMDMyOTQsImV4cCI6MTY3NDAxMDQ5NH0.zGxGWiET2hhjyw9-20LiuWibe5ta3uO69wo-LVzjqUo
+
+###
+GET {{BASE_URL}}/tickets HTTP/1.1
+Authorization: Bearer {{TOKEN}}
+
+###
+GET {{BASE_URL}}/tickets/63c74372e5f904ff1b253355 HTTP/1.1
+Authorization: Bearer {{TOKEN}}
+
+###
+POST {{BASE_URL}}/tickets HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{TOKEN}}
+
+{
+  "title": "Ticket 1",
+  "price": 10
+}
+
+###
+GET {{BASE_URL}}/auth/users HTTP/1.1
+
+
+###
+POST {{BASE_URL}}/auth/signup HTTP/1.1
+Content-Type: application/json
+
+{
+  "email":"santiago@google.com",
+  "password": "santiago123"
+}
+
+###
+POST {{BASE_URL}}/auth/signin HTTP/1.1
+Content-Type: application/json
+
+{
+  "email":"santiago@google.com",
+  "password": "santiago123"
+}
