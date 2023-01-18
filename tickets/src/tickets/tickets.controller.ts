@@ -35,9 +35,9 @@ export class TicketsController {
     return this.ticketsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ticketsService.findOne(id);
+  @Get(':slug')
+  findOne(@Param('slug') slug: string) {
+    return this.ticketsService.findOneBySlug(slug);
   }
 
   @Patch(':id')
