@@ -7,7 +7,7 @@ import { AuthModule } from '@node-ms/auth';
 
 @Module({
   imports: [
-    AuthModule.register({ url: process.env.AUTH_URL || 'localhost:5001' }),
+    AuthModule.register({ url: process.env.AUTH_URL || '0.0.0.0:5001' }),
     MongooseModule.forFeature([{ name: Ticket.name, schema: TicketSchema }]),
   ],
   controllers: [TicketsController],
