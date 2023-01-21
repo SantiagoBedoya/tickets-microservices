@@ -12,7 +12,6 @@ export type TicketDocument = HydratedDocument<Ticket>;
       delete ret.__v;
       delete ret.createdAt;
       delete ret.updatedAt;
-      delete ret.createdBy;
     },
   },
 })
@@ -20,14 +19,8 @@ export class Ticket {
   @Prop({ type: String, required: true })
   title: string;
 
-  @Prop({ type: String, required: true, unique: true })
-  slug: string;
-
   @Prop({ type: Number, required: true })
   price: number;
-
-  @Prop({ type: String, required: true })
-  createdBy: string;
 }
 
 export const TicketSchema = SchemaFactory.createForClass(Ticket);

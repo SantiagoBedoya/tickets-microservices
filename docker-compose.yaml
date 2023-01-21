@@ -4,6 +4,8 @@ services:
     image: mongo:6.0.3
     restart: always
     container_name: mongodb
+    ports:
+      - 27017:27017
   api-gateway:
     restart: always
     image: nginx:latest
@@ -21,6 +23,8 @@ services:
       MONGODB_URI: mongodb://database:27017/auth
       JWT_SECRET: superSecret123
       JWT_EXPIRESIN: 2h
+    ports:
+      - 3000:3000
     links:
       - database
     depends_on:
@@ -32,7 +36,23 @@ services:
     container_name: tickets
     environment:
       PORT: 3001
+      RMQ_URLS: amqps://zftoopxi:yOVEFq9ifu2Io94GKJM0UfJJumROtvx8@beaver.rmq.cloudamqp.com/zftoopxi
       MONGODB_URI: mongodb://database:27017/tickets
+      AUTH_URL: auth:5001
+    links:
+      - database
+      - auth
+    depends_on:
+      - database
+      - api-gateway
+  orders:
+    build:
+      context: ./orders
+    container_name: orders
+    environment:
+      PORT: 3002
+      RMQ_URLS: amqps://zftoopxi:yOVEFq9ifu2Io94GKJM0UfJJumROtvx8@beaver.rmq.cloudamqp.com/zftoopxi
+      MONGODB_URI: mongodb://database:27017/orders
       AUTH_URL: auth:5001
     links:
       - database
