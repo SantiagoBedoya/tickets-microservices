@@ -1,8 +1,10 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserDto } from '@node-ms/auth';
 import { Model } from 'mongoose';
@@ -18,6 +20,10 @@ export class OrdersService {
     private readonly ticketModel: Model<TicketDocument>,
     @InjectModel(Order.name)
     private readonly orderModel: Model<OrderDocument>,
+    @Inject('PAYMENTS_CLIENT')
+    private readonly paymentsClient: ClientProxy,
+    @Inject('TICKETS_CLIENT')
+    private readonly ticketsClient: ClientProxy,
   ) {}
 
   async create(createOrderDto: CreateOrderDto, user: UserDto) {
@@ -50,6 +56,8 @@ export class OrdersService {
       ticket,
     });
 
+    this.sendOrderCreated(order, ticket);
+
     return order;
   }
 
@@ -78,5 +86,51 @@ export class OrdersService {
     await this.orderModel.findByIdAndUpdate(id, {
       status: OrderStatus.Cancelled,
     });
+
+    this.sendOrderCancelled(order);
+  }
+
+  private sendOrderCreated(order: OrderDocument, ticket: TicketDocument) {
+    this.paymentsClient
+      .send('order:created', {
+        id: order._id,
+        status: order.status,
+        userId: order.userId,
+        expiresAt: order.expiresAt.toISOString(),
+        ticket: {
+          id: ticket._id,
+          title: ticket.title,
+          price: ticket.price,
+        },
+      })
+      .subscribe();
+    this.ticketsClient
+      .send('order:created', {
+        id: order._id,
+        status: order.status,
+        userId: order.userId,
+        expiresAt: order.expiresAt.toISOString(),
+        ticket: {
+          id: ticket._id,
+          title: ticket.title,
+          price: ticket.price,
+        },
+      })
+      .subscribe();
+  }
+
+  private sendOrderCancelled(order: OrderDocument) {
+    this.paymentsClient
+      .send('order:cancelled', {
+        id: order._id,
+        ticket: order.ticket,
+      })
+      .subscribe();
+    this.ticketsClient
+      .send('order:cancelled', {
+        id: order._id,
+        ticket: order.ticket,
+      })
+      .subscribe();
   }
 }

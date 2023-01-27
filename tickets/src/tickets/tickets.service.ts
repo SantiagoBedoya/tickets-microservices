@@ -8,11 +8,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
-import { Ticket, TicketDocument } from './entities/ticket.entity';
+import { Ticket, TicketDocument, TicketStatus } from './entities/ticket.entity';
 import slugify from 'slugify';
 import { UserDto } from '@node-ms/auth';
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
+import { OrderCreatedDto } from './dto/order-created.dto';
 
 @Injectable()
 export class TicketsService {
@@ -22,6 +23,12 @@ export class TicketsService {
     @Inject('ORDERS_CLIENT')
     private readonly ordersClient: ClientProxy,
   ) {}
+
+  async setTicketReserved(data: OrderCreatedDto) {
+    await this.ticketModel.findByIdAndUpdate(data.ticket.id, {
+      status: TicketStatus.Reserved,
+    });
+  }
 
   async create(createTicketDto: CreateTicketDto, user: UserDto) {
     const slug = slugify(createTicketDto.title);

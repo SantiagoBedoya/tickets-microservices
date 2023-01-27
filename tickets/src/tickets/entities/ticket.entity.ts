@@ -1,6 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
+export enum TicketStatus {
+  Available = 'available',
+  Reserved = 'reserved',
+}
+
 export type TicketDocument = HydratedDocument<Ticket>;
 
 @Schema({
@@ -28,6 +33,9 @@ export class Ticket {
 
   @Prop({ type: String, required: true })
   createdBy: string;
+
+  @Prop({ type: String, enum: TicketStatus, default: TicketStatus.Available })
+  status: string;
 }
 
 export const TicketSchema = SchemaFactory.createForClass(Ticket);

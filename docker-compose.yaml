@@ -6,6 +6,10 @@ services:
     container_name: mongodb
     ports:
       - 27017:27017
+  redis:
+    image: redis:7
+    restart: always
+    container_name: redis
   api-gateway:
     restart: always
     image: nginx:latest
@@ -60,3 +64,31 @@ services:
     depends_on:
       - database
       - api-gateway
+  payments:
+    build:
+      context: ./payments
+    container_name: payments
+    environment:
+      PORT: 3003
+      RMQ_URLS: amqps://zftoopxi:yOVEFq9ifu2Io94GKJM0UfJJumROtvx8@beaver.rmq.cloudamqp.com/zftoopxi
+      MONGODB_URI: mongodb://database:27017/payments
+      AUTH_URL: auth:5001
+    links:
+      - database
+      - auth
+    depends_on:
+      - database
+      - api-gateway
+  expiration:
+    build:
+      context: ./expiration
+    container_name: expiration
+    environment:
+      PORT: 3004
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RMQ_URLS: amqps://zftoopxi:yOVEFq9ifu2Io94GKJM0UfJJumROtvx8@beaver.rmq.cloudamqp.com/zftoopxi
+    links:
+      - redis
+    depends_on:
+      - redis
